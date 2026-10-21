@@ -12,7 +12,7 @@ if __name__ == '__main__':
     # Corrected function name to np.select
     df['class'] = np.select(conditions, choices)
     
-    # 2. Put the small prompt-engineering samples (125 rows total) into a temporary pool
+    # 2. Put the small prompt-engineering samples (225 rows total) into a temporary pool
     # The remaining majority of the data automatically becomes the 'test' set.
     prompt_pool, test = train_test_split(
         df, 
@@ -21,7 +21,7 @@ if __name__ == '__main__':
         stratify=df['class']
     )
     
-    # 3. Split the 125-row pool into your exact train (100) and dev (25) allocations
+    # 3. Split the 225-row pool into train (100) and dev (125) allocations
     train, dev = train_test_split(
         prompt_pool, 
         train_size=100, 
