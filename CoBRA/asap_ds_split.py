@@ -16,7 +16,7 @@ if __name__ == '__main__':
     # The remaining majority of the data automatically becomes the 'test' set.
     prompt_pool, test = train_test_split(
         df, 
-        train_size=125,  # 100 for train + 25 for dev
+        train_size=225,  # 100 for train + 125 for dev
         random_state=42, 
         stratify=df['class']
     )
@@ -25,7 +25,7 @@ if __name__ == '__main__':
     train, dev = train_test_split(
         prompt_pool, 
         train_size=100, 
-        test_size=25, 
+        test_size=125, 
         random_state=42, 
         stratify=prompt_pool['class']
     )
