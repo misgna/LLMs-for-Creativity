@@ -35,7 +35,7 @@ def compose_prompt(sample, rubric):
         
     return prompts
 
-def call_model(samples, rubric, temp, length):
+def call_model(model, tokenizer, samples, rubric, temp, length):
     prompts = compose_prompt(samples, rubric)
     
     tokenizer.pad_token = tokenizer.eos_token
@@ -55,8 +55,8 @@ def call_model(samples, rubric, temp, length):
             do_sample=True,
             temperature=temp, # Change temp to 0.7 or 0.3
             top_p=0.9,
-            #top_k=50,
-            #repetition_penalty=1.1,
+            top_k=50,
+            repetition_penalty=1.1,
             eos_token_id=tokenizer.eos_token_id,
             pad_token_id=tokenizer.eos_token_id
         )
@@ -69,22 +69,21 @@ def call_model(samples, rubric, temp, length):
     return {"gen_feedback": [feedback]}
 
 def main():
-    parser = argparse.ArgumentParser(description="Clustering features")
+    parser = argparse.ArgumentParser(description="Feedback generator")
     parser.add_argument('--model', type=str, default="llama3_8b", help="Large language model type")
     parser.add_argument('--batch', type=int, default=1, help="Batch size")
     parser.add_argument('--seed', type=int, default=42, help="Random seed")
-    parser.add_argument('--task', type=str, default="contra", help="Select irr (iterative rubric refinement) or bra(barch rubric aggregation)")
     parser.add_argument('--temp', type=float, default=0.7, help="Select temp for model")
     parser.add_argument('--length', type=int, default=500, help="Output length")
     parser.add_argument('--nsamples', type=int, default=10, help="Sample size")
-    parser.add_argument('--rubric', type=str, default="coirr", help="Select rubric type coirr (iterative refinement) or cobra (batch aggregatpr)")
+    parser.add_argument('--rubric', type=str, default="cobra", help="Select rubric type cobra (batch aggregator)")
     
     args = parser.parse_args()
-    return args.model, args.batch, args.seed, args.task, args.temp, args.length, args.nsamples, args.rubric
+    return args.model, args.batch, args.seed, args.temp, args.length, args.nsamples, args.rubric
 
 if __name__ == "__main__":
        # 0. Load args
-    model_args, batch, seed, task, temp, length, nsamples, rub_type = main()
+    model_args, batch, seed, temp, length, nsamples, rub_type = main()
     set_seed(seed)
     
     # 1. load model
@@ -99,7 +98,7 @@ if __name__ == "__main__":
     # 2. Load dataset
     ds_filepath = "dataset/dev.csv"
     model_args_rub = "llama3_8b"
-    test_nsamples = 25
+    test_nsamples = 125
     dataset = get_dataset(ds_filepath, seed, test_nsamples)
     dataset = Dataset.from_pandas(dataset)
     
@@ -109,7 +108,7 @@ if __name__ == "__main__":
     print(rubric)
     
     # 3. Rubric construction
-    dataset_rubric = dataset.map(call_model, batched=True, batch_size=batch, fn_kwargs={'rubric': rubric, 'temp': temp, 'length': length})
+    dataset_rubric = dataset.map(call_model, batched=True, batch_size=batch, fn_kwargs={'model': model, 'tokenizer': tokenizer, 'rubric': rubric, 'temp': temp, 'length': length})
     
     # 4. Save to file
     dataset_df = dataset_rubric.to_pandas()

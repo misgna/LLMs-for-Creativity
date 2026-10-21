@@ -34,8 +34,8 @@ def call_model(prompt, model, tokenizer):
             do_sample=True,
             temperature=TEMP, # Change temp to 0.7 or 0.3
             top_p=0.9,
-            #top_k=50,
-            #repetition_penalty=1.1,
+            top_k=50,
+            repetition_penalty=1.1,
             eos_token_id=tokenizer.eos_token_id,
             pad_token_id=tokenizer.eos_token_id
         )

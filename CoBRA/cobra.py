@@ -62,11 +62,11 @@ if __name__ == '__main__':
     model_args, seed, temp, length, nsamples = main()
     set_seed(seed)
     
-    #2. Load tokenizer and model
+    # Load tokenizer and model
     checkpoint = get_checkpoint(model_args)
     model, tokenizer = load_model_and_tokenizer(checkpoint)
     
-   # Format model identifier for file paths
+    # Format model identifier for file paths
     model_name = getattr(model.config, "_name_or_path", "model")
     model_name = model_name.replace(".", "-").replace("/", "-")
     #formatted_temp = str(temp).replace(".", "_")

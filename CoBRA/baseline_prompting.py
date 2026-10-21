@@ -1,11 +1,8 @@
 import torch
-import pandas as pd
 from datasets import Dataset
 from utils import get_dataset
 from transformers import AutoModelForCausalLM, AutoTokenizer
 from utils import get_checkpoint
-from evaluation import Evaluation
-from prompts import get_example, get_system_prompt_template_for_feedback_generation, get_user_prompt_template_for_feedback_generation
 import argparse
 
 def compose_prompt(samples):
@@ -81,7 +78,7 @@ def call_model(samples, temp, length, model, tokenizer):
     return {"gen_feedback": feedbacks}
 
 def get_feedback(model, tokenizer, seed, temp, length, out_path):
-    batch = 1  # Can now be increased safely for faster processing
+    batch = 1 
     
     # 1. Load dataset
     ds_filepath = "dataset/dev.csv" 
@@ -90,7 +87,7 @@ def get_feedback(model, tokenizer, seed, temp, length, out_path):
     dataset_df = get_dataset(ds_filepath, seed, test_nsamples)
     dataset_df = Dataset.from_pandas(dataset_df)
 
-    # 4. Generate feedback and append new column
+    # 2. Generate feedback and append new column
     feedback = dataset_df.map(
             call_model,
             batched=True,
@@ -119,7 +116,7 @@ def str2bool(v):
         raise argparse.ArgumentTypeError("Boolean value expected.")
          
 def parse_args():
-    parser = argparse.ArgumentParser(description="Score2Feedback: Essay -> Feedback")
+    parser = argparse.ArgumentParser(description="Essay -> Feedback")
     parser.add_argument("--llm", type=str, default="llama3_8b", help="LLM type")
     parser.add_argument("--seed", type=int, default=42, help="Random seed")
     parser.add_argument("--temp", type=float, default=0.7, help="LLM temperature")
